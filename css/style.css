@@ -1,0 +1,39 @@
+*{margin: 0;padding: 0;}
+body{background: #000;}
+i{color: #fff;cursor: pointer;}
+#wf-waterfall{
+	position: relative;
+	margin: 0 auto;
+}
+#wf-waterfall .wf-item{
+	float: left;
+	width: 200px;
+	padding: 5px;
+	padding-bottom: 5px;
+}
+#wf-waterfall .wf-item .wf-img{
+    position: relative;
+}
+#wf-waterfall .wf-item .wf-img img{
+    width: 100%;
+    display: block;
+}
+#wf-waterfall .wf-item .wf-info{
+	padding:5px; 
+	border: 1px solid #000;
+	overflow: hidden;
+}
+#wf-waterfall .wf-item .wf-img .wf-mask{
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+	background-color: #000000;
+	opacity: 0;
+	filter: Alpha(opacity=0); 
+}
+#wf-waterfall .wf-item:hover .wf-img .wf-mask{
+	opacity: 0.45;
+	filter: Alpha(opacity=45); 
+}
