@@ -2,7 +2,6 @@
    /******瀑布流对象*****/
    var Waterfall = function(config){
        var self = this;
-       this.flag = true;
        //默认配置的参数
        this.config = {
        	  "selectId":"wf-waterfall",//瀑布流的id选择器
@@ -19,39 +18,24 @@
        this.waterfalls();
        //绑定滚动事件
        $(window).scroll(function(){
-            var sh = document.documentElement.scrollHeight;
+            var sh = self.wfitems.last().position().top + self.wfitems.last().outerHeight()/2;
             var ch = document.documentElement.clientHeight;
             var cw = document.documentElement.clientWidth;
-
-            if(self.flag){
-                  self.flag = false;
-                  for (var i = 0; i < 6; i++) {
-                    
-                  
-                  var nwf = self.wfitems.eq(0).clone().appendTo(self.waterfall).css({
-                        width:self.config.width,
-                        position:"absolute",
-                        top:self.createRandomNumber(0,ch/2),
-                        left:self.createRandomNumber(0,cw/2),
-                        opacity:0 
-                  });
-                  var obj = self.minHightToIndex(self.arr);
-                    //重新更新this.arr中的值
-                  self.arr[obj.index] += nwf.outerHeight();
-                  var w = nwf.outerWidth();
-                  nwf.animate({
-                        position:"absolute",
-                        top:obj.height,
-                        left:obj.index*w,
-                        opacity:1
-                  },self.config.speed,function(){
-                       self.flag = true;
-                  });
-                }
-            }
-
-
+            var sTop = $(this).scrollTop();
+            if(ch + sTop > sh){
+                self.wfitems.eq(self.createRandomNumber(1,20)).clone(false).appendTo(self.waterfall).css({
+                      width:self.config.width,
+                      position:"absolute",
+                      top:self.createRandomNumber(-2*ch,-ch),
+                      left:self.createRandomNumber(-cw/2,cw/2),
+                      opacity:0 
+                });
+                self.wfitems = self.waterfall.children();
+                self.waterfalls();
+           }
        });
+
+
    };
    /*****原型继承*****/
    Waterfall.prototype = {
@@ -79,36 +63,40 @@
                     opacity:0 
            	    });
            });
-           //存放column个wf-item对象的高度
-           this.arr = [];
-           for (var i = 0; i < this.config.column; i++) {
-           	    var w = this.wfitems.eq(i).outerWidth()*i;
-           	    this.wfitems.eq(i).animate({
-           	    	position:"absolute",
-                    top:0,
-                    left:w,
-                    opacity:1 
-           	    },this.config.speed);
-           	    this.arr.push(this.wfitems.eq(i).outerHeight());
-           }
+
         },
         /**
          * { function_description }
          */
         waterfalls:function(){
+            var arr = [];
         	  //将this.wfitems转换为数组
-            for (var i = this.config.column; i < this.wfitems.size();i++) {
-            	//获取数组中的最小高度和索引值
-            	var obj = this.minHightToIndex(this.arr);
-                //重新更新this.arr中的值
-            	this.arr[obj.index] +=  this.wfitems.eq(i).outerHeight();
-            	var w = this.wfitems.eq(i).outerWidth();
-            	this.wfitems.eq(i).animate({
-                    position:"absolute",
-                    top:obj.height,
-                    left:obj.index*w,
-                    opacity:1
-            	},this.config.speed);
+            for (var i = 0; i < this.wfitems.size();i++) {
+                //定义初始化偏移量都为0
+                var offsetw = 0,
+                    offseth = 0;
+                if(i< this.config.column) {
+                     //第一列设置top都为0，arr里存放都为前column个wfitem的高度
+                     offsetw = this.wfitems.eq(i).outerWidth()*i;
+                     arr.push(this.wfitems.eq(i).outerHeight());
+                }else{
+                    //获取数组中的最小高度和索引值
+                    var obj = this.minHightToIndex(arr);
+                    //重新更新arr中的值
+                    arr[obj.index] += this.wfitems.eq(i).outerHeight();
+                    var w = this.wfitems.eq(i).outerWidth();
+                    offsetw = obj.index*w;
+                    offseth = obj.height;
+                }
+                //设置动画
+                this.wfitems.eq(i).animate({
+                          position:"absolute",
+                          top:offseth,
+                          left:offsetw,
+                          opacity:1
+                },this.config.speed);
+
+
             }
         },
         /**
@@ -135,7 +123,7 @@
         createRandomNumber:function(min,max){
         	   var m = max > min?min:max;
         	   var diff = max - min > 0? max -min:min - max;
-        	   return m + diff*Math.random();
+        	   return m + Math.floor(diff*Math.random());
         },
         scrollUpdate:function(){
              
